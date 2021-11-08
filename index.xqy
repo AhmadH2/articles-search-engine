@@ -28,10 +28,10 @@ declare variable $options :=
       <bucket lt="2020-01-01" ge="2019-01-01" name="2019">2019</bucket>
       <bucket lt="2019-01-01" ge="2018-01-01" name="2018">2018</bucket>
       <bucket lt="2018-01-01" ge="2017-01-01" name="2017">2017</bucket>
-      <bucket lt="2017-01-01" ge="2015-01-01" name="2015s">2015s</bucket>
-      <bucket lt="2015-01-01" ge="2010-01-01" name="2010s">2010s</bucket>
-      <bucket lt="2010-01-01" ge="2005-01-01" name="2005s">2005s</bucket>
-      <bucket lt="2005-01-01" ge="2000-01-01" name="2000s">2000s</bucket>
+      <bucket lt="2017-01-01" ge="2015-01-01" name="2015s">2015s (2015 - 2017)</bucket>
+      <bucket lt="2015-01-01" ge="2010-01-01" name="2010s">2010s (2010 - 2015)</bucket>
+      <bucket lt="2010-01-01" ge="2005-01-01" name="2005s">2005s (2005 - 2010)</bucket>
+      <bucket lt="2005-01-01" ge="2000-01-01" name="2000s">2000s (2000 - 2005)</bucket>
       <bucket lt="2000-01-01" name="less">less than 2000</bucket>
       <element ns="http://marklogic.com/articles" name="Date"/>
       <facet-option>limit=10</facet-option>
@@ -93,7 +93,35 @@ declare function local:result-controller()
 
 declare function local:result-controller()
 {
-    local:search-results()
+    if(xdmp:get-request-field("uri"))
+		then local:article-detail()
+		else local:search-results()
+};
+
+declare function local:article-detail()
+{
+	let $uri := xdmp:get-request-field("uri")
+	return local:display-article-details($uri)
+};
+
+declare function local:display-article-details($uri)
+{
+	let $article := fn:doc($uri) 
+	return <div>
+		<div >
+      <div class="articleTitle"> {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:ArticleTitle/text()} </div>
+    </div>
+    	{if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Date/text()) then <div class="detailitem">date: {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Date/text()}</div> else ()}
+      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Journal/ts:Title/text()) then <div class="detailitem">Journal: {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Journal/ts:Title/text()}</div> else ()}
+      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Abstract/ts:AbstractText/text()) then <div class="detailitem">Abstract: {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Abstract/ts:AbstractText/text()}</div> else ()}
+
+      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Authors/ts:Author) 
+      then <div> { fn:string-join($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Authors/ts:Author) }</div> else ()}
+
+
+
+
+		</div>
 };
 
 (: gets the current sort argument from the query string :)
@@ -309,18 +337,33 @@ declare function local:default-results()
 
 
 xdmp:set-response-content-type("text/html; charset=utf-8"),
-'<!DOCTYPE html teeeeeeeeeeeeest PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
+'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Pubmet Articles</title>
+<title>Articles Search</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"/>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"/>
+
 <link href="css/articles.css" rel="stylesheet" type="text/css"/>
 <script src="js/articles.js" type="text/javascript"/>
 </head>
 <body>
-<div id="wrapper">
-<div id="header"><a href="index.xqy"><img src="articles.jpg" width="918" height="153" border="0"/></a></div>
-<div id="leftcol">
-  <img src="images/checkblank.gif"/>facet content here<br />
+<nav class="navbar navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand">Articles Search</a>
+    <form class="d-flex">
+        <input class="form-control me-2"  type="text" name="q" id="q" size="50" value="{xdmp:get-request-field("q")}"/><button class="btn btn-link" type="button" id="reset_button" onclick="document.getElementById('bday').value = ''; document.getElementById('q').value = ''; document.location.href='index.xqy'">clear</button>&#160;
+        
+        <input class="btn btn-outline-success" type="submit" id="submitbtn" name="submitbtn" value="search"/>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
+ 
+      </form>
+  </div>
+</nav>
+<div class="row">
+<div class="col-md-3 facets-list">
+  <img src="images/checkblank.gif"/><br />
   {local:facets()}
   <br />
   <div class="purplesubheading"><img src="images/checkblank.gif"/>check your birthday!</div>
@@ -331,12 +374,9 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
   </form>
   <div class="tinynoitalics"><img src="images/checkblank.gif"/>(e.g. 1965-10-31)</div>
 </div>
-<div id="rightcol">
+<div class="col-md-9">
   <form name="form1" method="get" action="index.xqy" id="form1">
-  <div id="searchdiv">
-    <input type="text" name="q" id="q" size="50" value="{xdmp:get-request-field("q")}"/><button type="button" id="reset_button" onclick="document.getElementById('bday').value = ''; document.getElementById('q').value = ''; document.location.href='index.xqy'">x</button>&#160;
-    <input style="border:0; width:0; height:0; background-color: #A7C030" type="text" size="0" maxlength="0"/><input type="submit" id="submitbtn" name="submitbtn" value="search"/>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<a href="advanced.xqy">advanced search</a>
-  </div>
+
   <div id="detaildiv">
   {  local:result-controller()  }  	
   </div>

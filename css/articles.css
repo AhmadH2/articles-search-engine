@@ -1,11 +1,10 @@
 @charset "utf-8";
 body {
-	background-color: #666;
 	font-family: Verdana, Geneva, sans-serif;
 	font-size: 11px;
 	line-height: 150%;
 	color: #333;
-	padding-top: 20px;
+	width:100%;
 }
 form {
 	display: inline;
@@ -15,25 +14,22 @@ a {
 	color: #333;
 }
 
-#wrapper {
-	background-color: #FFF;
-	width: 940px;
-	padding-top: 12px;
-	padding-right: 10px;
-	padding-bottom: 0px;
-	padding-left: 10px;
-	margin: auto;
-}
+
 
 #header {
 	background-color: #56488C;
 	margin: 4px;
 }
+
+.facets-list {
+	background-color: #A2DBFA;
+	color:white;
+}
 #leftcol {
 	background-color: #B6ADD6;
 	float: left;
 	margin: 4px;
-	width: 200px;
+	width: 20%;
 	padding-top: 20px;
 	padding-right: 15px;
 	padding-bottom: 15px;
@@ -54,7 +50,7 @@ a {
 
 #rightcol {
 	float: right;
-	width: 702px;
+	width: 76%;
 }
 
 #searchdiv {
@@ -69,8 +65,7 @@ a {
 	margin-left: 4px;
 }
 #detaildiv {
-	background-color: #DFEAAC;
-	margin: 4px;
+
 	padding-top: 12px;
 	padding-right: 35px;
 	padding-bottom: 16px;
@@ -109,7 +104,7 @@ a {
 }
 
 #countdiv {
-	text-align: right;
+	text-align: left;
 }
 #pagenumdiv {
 	text-align: right;
