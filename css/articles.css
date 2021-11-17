@@ -1,6 +1,6 @@
 @charset "utf-8";
 body {
-	font-family: Verdana, Geneva, sans-serif;
+	font-family: Georgia, serif;
 	font-size: 11px;
 	line-height: 150%;
 	color: #333;
@@ -14,7 +14,9 @@ a {
 	color: #333;
 }
 
-
+.navbar-brand {
+    font-size: 30px;
+}
 
 #header {
 	background-color: #56488C;
@@ -22,8 +24,8 @@ a {
 }
 
 .facets-list {
-	background-color: #A2DBFA;
-	color:white;
+	border-right: 2px solid gray;	
+	min-height: calc(100vh - 54px);
 }
 #leftcol {
 	background-color: #B6ADD6;
@@ -72,7 +74,7 @@ a {
 	padding-left: 30px;
 }
 #detaildiv a {
-	color: #6D7D20;
+	color: #007bff;
 }
 
 #resultnumbers {
@@ -94,26 +96,67 @@ a {
 	clear: both;
 	height: 10px;
 }
+
+#sortbywrapper{
+	position:relative;
+	height:60px;
+}
 #sortbydiv {
-	text-align: right;
+	text-align: right !important;
 	margin-top: 8px;
 	margin-bottom: 8px;
+	position:absolute;
+	right:5px;
+}
+
+#sortby{
+	 max-width:100px;
+
 }
 .imgbaseline {
 	vertical-align: text-bottom;
 }
 
+.descriptionwrapper{
+	padding-top: 12px;
+}
+
+.articleTitle{
+	font-size:20px;
+	font-weight: 700;
+	line-height: 25px;
+	padding-top:7px;
+	padding-bottom: 10px;
+}
+
+.detailitems{
+	padding-right:10px;
+	padding-bottom: 14px;
+	font-size:13px;
+}
+
+
 #countdiv {
 	text-align: left;
+	font-size:16px;
 }
 #pagenumdiv {
 	text-align: right;
 }
 
-.songname {
-	padding-top: 10px;
-	padding-bottom: 1px;
+.articlename {
+	padding-top: 16px;
+	padding-bottom: 3px;
 	font-weight: bold;
+	font-size:16px;
+}
+
+.articleindex{
+	font-size:13px;
+}
+
+.articleindexinfo {
+	font-size:14px;
 }
 
 .week {
@@ -125,13 +168,14 @@ a {
 
 .description {
 	margin-bottom: 6px;
+	font-size:13px;
 }
 
 .spacer12px {
 	height: 12px;
 }
 
-.songnamelarge {
+.articlenamelarge {
 	padding-top: 10px;
 	padding-bottom: 6px;
 	font-weight: bold;
@@ -139,8 +183,18 @@ a {
 }
 .detailitem {
 	margin-bottom: 4px;
-	font-size: 11px;
 }
+.detailabstract{
+	font-size:13px;
+	padding-top:15px;
+	line-height: 22px;
+}
+
+.detailabstract strong{
+	font-size:17px;
+	padding-bottom: 10px;
+}
+
 .albumimage {
 	float: right;
 	margin-left: 20px;
@@ -162,7 +216,7 @@ a {
 	margin-top: 3px;
 }
 .highlight {
-	background-color: #C8DB6F;
+	background-color: #f7ea41;
 }
 .white {
 	color:white;
@@ -173,17 +227,39 @@ a {
 .facet{
     padding-top: 2px;
     padding-bottom: 12px;
+	padding-left: 20px;
+	font-size:15px;
+}
+
+.facet-name{
+	font-size: 20px;
+	font-weight: bold;
+	color: #007bff;
+	margin-bottom: 8px;
 }
 .facet-value {
     display: block;
+	padding-top:2px;
+	padding-bottom: 2px;
+	line-height: 18px;
 }
 .facet-hidden {
     display: none;
 }
+
 .facet-toggle {
 }
+
+.facet-toggle a {
+	color:#007bff;
+}
+
 .facet-toggle-hidden {
   display: none;
+}
+
+.facet-toggle-hidden a {
+	color:#007bff;
 }
 
 .padleft {

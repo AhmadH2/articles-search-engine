@@ -5,9 +5,9 @@ import module namespace search = "http://marklogic.com/appservices/search" at "/
 
 declare variable $options := 
 <options xmlns="http://marklogic.com/appservices/search">
-  <constraint name="Author">
+  <constraint name="AuthorName" >
     <range type="xs:string" collation="http://marklogic.com/collation/en/S1/T00BB/AS">
-      <element ns="http://marklogic.com/articles" name="Author"/>
+      <element ns="http://marklogic.com/articles" name="AuthorName"/>
       <facet-option>limit=30</facet-option>
       <facet-option>frequency-order</facet-option>
       <facet-option>descending</facet-option>
@@ -64,7 +64,7 @@ declare variable $options :=
         <search:score/>
       </search:sort-order>
     </search:state> 
-    <search:state name="title">
+    <search:state name="ArticleTitle">
       <search:sort-order direction="ascending" type="xs:string">
         <search:element ns="http://marklogic.com/articles" name="ArticleTitle"/>
       </search:sort-order>
@@ -76,10 +76,11 @@ declare variable $options :=
   
 </options>;
 
+
+
 declare variable $results :=  let $q := xdmp:get-request-field("q", "sort:newest")
                               let $q := local:add-sort($q)
                               return  search:search($q, $options, xs:unsignedLong(xdmp:get-request-field("start","1")));
-
 declare variable $facet-size as xs:integer := 8;
 
 (:
@@ -107,17 +108,25 @@ declare function local:article-detail()
 declare function local:display-article-details($uri)
 {
 	let $article := fn:doc($uri) 
-	return <div>
-		<div >
+	return <div class="descriptionwrapper">
+		<div>
       <div class="articleTitle"> {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:ArticleTitle/text()} </div>
     </div>
-    	{if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Date/text()) then <div class="detailitem">date: {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Date/text()}</div> else ()}
-      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Journal/ts:Title/text()) then <div class="detailitem">Journal: {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Journal/ts:Title/text()}</div> else ()}
-      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Abstract/ts:AbstractText/text()) then <div class="detailitem">Abstract: {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Abstract/ts:AbstractText/text()}</div> else ()}
+    <div class="row">
+      <div class="col-md-6 detailitems">
+      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Date/text()) then <div class="detailitem"><strong>date: </strong>{$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Date/text()}</div> else ()}
+      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Authors/ts:AuthorName) 
+      then <div> <strong>Author/s: </strong>{ fn:string-join($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Authors/ts:AuthorName, ', ') }</div> else ()}
 
-      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Authors/ts:Author) 
-      then <div> { fn:string-join($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Authors/ts:Author) }</div> else ()}
+      </div>
+      <div class="col-md-6 detailitems">
+      {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Journal/ts:Title/text()) then <div class="detailitem"><strong>Journal: </strong>{$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Journal/ts:Title/text()}</div> else ()}
+     
+      </div>
+    </div>
+    	 {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Abstract/ts:AbstractText/text()) then <div class="detailabstract"><strong>Abstract</strong><br> </br>{$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Abstract/ts:AbstractText/text()}</div> else ()}
 
+   
 
 
 
@@ -185,12 +194,17 @@ declare function local:sort-options(){
                 $option/node()
             }
     return 
+    <div id="sortbywrapper">
         <div id="sortbydiv">
-             sort by: 
-                <select name="sortby" id="sortby" onchange='this.form.submit()'>
+        <span> sort by: </span>
+        <span>
+              
+                <select name="sortby" id="sortby" class="form-control" onchange='this.form.submit()'>
                      {$newsortoptions}
                 </select>
+                </span>
         </div>
+    </div>
 };
 
 declare function local:pagination($resultspag)
@@ -222,7 +236,6 @@ declare function local:pagination($resultspag)
     
     return (
         <div id="countdiv"><b>{$start}</b> to <b>{$end}</b> of {$total}</div>,
-        local:sort-options(),
         if($rangestart eq $rangeend)
         then ()
         else
@@ -253,22 +266,23 @@ declare function local:description($article)
 
 declare function local:search-results()
 {
+
 	let $items :=
         for $article in $results/search:result
         let $uri := fn:data($article/@uri)
         let $article-doc := fn:doc($uri)
         return 
           <div>
-             <div class="songname">"{$article-doc//ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:ArticleTitle/text()}"</div>
-			 <div><strong>Authors: </strong>{$article-doc//ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Authors/ts:Author/fn:data()}</div>
-             <div><strong>Date: </strong>{$article-doc//ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Date/text()}</div>
+             <div class="articlename">{$article-doc//ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:ArticleTitle/text()}</div>
+			 <div class="articleindexinfo"><strong class="articleindex">Authors: </strong>{$article-doc//ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Authors/ts:AuthorName/fn:data()}</div>
+             <div class="articleindexinfo"><strong class="articleindex">Date: </strong>{$article-doc//ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Date/text()}</div>
 			 <div class="description">{local:description($article)}&#160;
                 <a href="index.xqy?uri={xdmp:url-encode($uri)}">[more]</a>
              </div>
-          </div>
+          </div>      
     return
         if ($items)
-        then (local:pagination($results), $items) 
+        then  ( local:sort-options(),$items, local:pagination($results))
         else <div>Sorry, no results for your search.<br/><br/><br/></div>
 };
 
@@ -280,7 +294,7 @@ declare function local:facets()
     return
         if($facet-count > 0)
         then <div class="facet">
-                <div class="purplesubheading"><img src="images/checkblank.gif"/>{$facet-name}</div>
+                <div class="facet-name"><img src="images/checkblank.gif"/>{$facet-name}</div>
                 {
                     let $facet-items :=
                         for $val in $facet/search:facet-value
@@ -314,8 +328,8 @@ declare function local:facets()
                                 if($facet-count gt $facet-size)
                                 then (
 									<div class="facet-hidden" id="{$facet-name}">{$facet-items[position() gt $facet-size]}</div>,
-									<div class="facet-toggle" id="{$facet-name}_more"><img src="images/checkblank.gif"/><a href="javascript:toggle('{$facet-name}');" class="white">more...</a></div>,
-									<div class="facet-toggle-hidden" id="{$facet-name}_less"><img src="images/checkblank.gif"/><a href="javascript:toggle('{$facet-name}');" class="white">less...</a></div>
+									<div class="facet-toggle" id="{$facet-name}_more"><img src="images/checkblank.gif"/><a href="javascript:toggle('{$facet-name}');" >more...</a></div>,
+									<div class="facet-toggle-hidden" id="{$facet-name}_less"><img src="images/checkblank.gif"/><a href="javascript:toggle('{$facet-name}');" >less...</a></div>
 								)                                 
                                 else ()   
                             )
@@ -329,7 +343,7 @@ declare function local:default-results()
 {
 (for $article in /ts:PubmedArticle		 
 		return (<div>
-			<div class="songname">Title: {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:ArticleTitle/text()}</div>
+			<div class="articlename">Title: {$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:ArticleTitle/text()}</div>
 			
 			</div>)	   	
 		)[1 to 10]
@@ -346,15 +360,22 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"/>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"/>
 
+<script type="text/javascript"
+src="../autocomplete/lib/prototype/prototype.js"></script>
+<script type="text/javascript"
+src="../autocomplete/lib/scriptaculous/scriptaculous.js"></script>
+<script type="text/javascript" src="../autocomplete/src/autocomplete.js"></script>
+
+<script type="text/javascript" src="../autocomplete/src/lib.js"></script>
 <link href="css/articles.css" rel="stylesheet" type="text/css"/>
 <script src="js/articles.js" type="text/javascript"/>
 </head>
 <body>
 <nav class="navbar navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand">Articles Search</a>
+    <a class="navbar-brand" href="http://localhost:8028/index.xqy">Articles Search</a>
     <form class="d-flex">
-        <input class="form-control me-2"  type="text" name="q" id="q" size="50" value="{xdmp:get-request-field("q")}"/><button class="btn btn-link" type="button" id="reset_button" onclick="document.getElementById('bday').value = ''; document.getElementById('q').value = ''; document.location.href='index.xqy'">clear</button>&#160;
+        <input class="form-control me-2"  type="text" name="q" id="q" size="50" autocomplete="off" value="{xdmp:get-request-field("q")}"/><button class="btn btn-link" type="button" id="reset_button" onclick="document.getElementById('bday').value = ''; document.getElementById('q').value = ''; document.location.href='index.xqy'">clear</button>&#160;
         
         <input class="btn btn-outline-success" type="submit" id="submitbtn" name="submitbtn" value="search"/>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
  
@@ -366,13 +387,6 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
   <img src="images/checkblank.gif"/><br />
   {local:facets()}
   <br />
-  <div class="purplesubheading"><img src="images/checkblank.gif"/>check your birthday!</div>
-  <form name="formbday" method="get" action="index.xqy" id="formbday">
-    <img src="images/checkblank.gif" width="7"/>
-    <input type="text" name="bday" id="bday" size="15"/> 
-    <input type="submit" id="btnbday" value="go"/>
-  </form>
-  <div class="tinynoitalics"><img src="images/checkblank.gif"/>(e.g. 1965-10-31)</div>
 </div>
 <div class="col-md-9">
   <form name="form1" method="get" action="index.xqy" id="form1">
