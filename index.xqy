@@ -1,6 +1,11 @@
 xquery version "1.0-ml";
 declare namespace ts="http://marklogic.com/articles";
-
+ (:
+ Students work:
+ Ahmed Horyzat
+ Abdelkhalik Aljuneidi
+ Yousef Qwaider
+ :)
 import module namespace search = "http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
 
 declare variable $options := 
@@ -64,7 +69,7 @@ declare variable $options :=
         <search:score/>
       </search:sort-order>
     </search:state> 
-    <search:state name="ArticleTitle">
+    <search:state name="title">
       <search:sort-order direction="ascending" type="xs:string">
         <search:element ns="http://marklogic.com/articles" name="ArticleTitle"/>
       </search:sort-order>
@@ -72,8 +77,7 @@ declare variable $options :=
         <search:score/>
       </search:sort-order>
     </search:state>                   
-  </search:operator>
-  
+  </search:operator>  
 </options>;
 
 
@@ -81,16 +85,9 @@ declare variable $options :=
 declare variable $results :=  let $q := xdmp:get-request-field("q", "sort:newest")
                               let $q := local:add-sort($q)
                               return  search:search($q, $options, xs:unsignedLong(xdmp:get-request-field("start","1")));
+                              
 declare variable $facet-size as xs:integer := 8;
 
-(:
-declare function local:result-controller()
-{
-	if(xdmp:get-request-field("q"))
-		then local:search-results()  
-	else local:default-results()
-};
-:)
 
 declare function local:result-controller()
 {
@@ -125,11 +122,6 @@ declare function local:display-article-details($uri)
       </div>
     </div>
     	 {if ($article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Abstract/ts:AbstractText/text()) then <div class="detailabstract"><strong>Abstract</strong><br> </br>{$article/ts:PubmedArticle/ts:MedlineCitation/ts:Article/ts:Abstract/ts:AbstractText/text()}</div> else ()}
-
-   
-
-
-
 		</div>
 };
 
@@ -321,8 +313,11 @@ declare function local:facets()
                         let $link := if($sort and fn:not(local:get-sort($link))) then fn:concat($link," ",$sort) else $link
                         let $link := fn:encode-for-uri($link)
                         return
+                        if($val != " ")
+                        then 
                             <div class="facet-value">{$icon}<a href="index.xqy?q={$link}">
                             {fn:lower-case($print)}</a> [{fn:data($val/@count)}]</div>
+                            else ()
                      return (
                                 <div>{$facet-items[1 to $facet-size]}</div>,
                                 if($facet-count gt $facet-size)
@@ -374,12 +369,7 @@ src="../autocomplete/lib/scriptaculous/scriptaculous.js"></script>
 <nav class="navbar navbar-light bg-light">
   <div class="container-fluid">
     <a class="navbar-brand" href="http://localhost:8028/index.xqy">Articles Search</a>
-    <form class="d-flex">
-        <input class="form-control me-2"  type="text" name="q" id="q" size="50" autocomplete="off" value="{xdmp:get-request-field("q")}"/><button class="btn btn-link" type="button" id="reset_button" onclick="document.getElementById('bday').value = ''; document.getElementById('q').value = ''; document.location.href='index.xqy'">clear</button>&#160;
-        
-        <input class="btn btn-outline-success" type="submit" id="submitbtn" name="submitbtn" value="search"/>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
- 
-      </form>
+
   </div>
 </nav>
 <div class="row">
@@ -389,8 +379,13 @@ src="../autocomplete/lib/scriptaculous/scriptaculous.js"></script>
   <br />
 </div>
 <div class="col-md-9">
-  <form name="form1" method="get" action="index.xqy" id="form1">
-
+  <form  name="form1" method="get" action="index.xqy" id="form1">
+   <div id="searchdiv">
+        <input class="form-control me-2"  type="text" name="q" id="q" size="50" autocomplete="off" value="{xdmp:get-request-field("q")}"/><button class="btn btn-link" type="button" id="reset_button" onclick="document.getElementById('bday').value = ''; document.getElementById('q').value = ''; document.location.href='index.xqy'">clear</button>&#160;
+        
+        <input class="btn btn-outline-success" type="submit" id="submitbtn" name="submitbtn" value="search"/>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
+ 
+  </div>
   <div id="detaildiv">
   {  local:result-controller()  }  	
   </div>

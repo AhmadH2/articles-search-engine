@@ -56,15 +56,6 @@ a {
 }
 
 #searchdiv {
-	background-color: #A7C030;
-	padding-top: 12px;
-	padding-right: 15px;
-	padding-bottom: 12px;
-	padding-left: 30px;
-	margin-top: 4px;
-	margin-right: 4px;
-	margin-bottom: 8px;
-	margin-left: 4px;
 }
 #detaildiv {
 
@@ -162,9 +153,7 @@ a {
 .week {
 	padding-bottom: 0px;
 }
-.genre {
-	padding-bottom: 1px;
-}
+
 
 .description {
 	margin-bottom: 6px;
